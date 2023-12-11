@@ -18,6 +18,7 @@ public class GameInput : MonoBehaviour {
         playerInputActions.Player.InteractAlternate.performed += InteractAlternate_performed;
     }
 
+
     private void InteractAlternate_performed(InputAction.CallbackContext obj) {
         OnInteractAlternateAction?.Invoke(this, EventArgs.Empty);
     }
@@ -32,5 +33,10 @@ public class GameInput : MonoBehaviour {
         inputVector = inputVector.normalized;
         
         return inputVector;
+    }
+
+    private void OnDisable() {
+        playerInputActions.Player.Interact.performed -= Interact_performed;
+        playerInputActions.Player.InteractAlternate.performed -= InteractAlternate_performed;
     }
 }

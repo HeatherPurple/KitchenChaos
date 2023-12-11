@@ -14,6 +14,7 @@ public class Player : MonoBehaviour, IKitchenObjectParent {
         public BaseCounter selectedCounter;
     }
     
+    public event EventHandler OnPickedSomething;
     
     [SerializeField] private float movementSpeed = 7;
     [SerializeField] private GameInput gameInput;
@@ -39,12 +40,16 @@ public class Player : MonoBehaviour, IKitchenObjectParent {
     }
 
     private void GameInput_OnInteractAlternateAction(object sender, EventArgs e) {
+        if (!GameHandler.Instance.IsGamePlaying()) return;
+        
         if (selectedCounter != null) {
             selectedCounter.InteractAlternate(this);
         }
     }
 
     private void GameInput_OnInteractAction(object obj, EventArgs e) {
+        if (!GameHandler.Instance.IsGamePlaying()) return;
+        
         if (selectedCounter != null) {
             selectedCounter.Interact(this);
         }
@@ -129,6 +134,11 @@ public class Player : MonoBehaviour, IKitchenObjectParent {
             selectedCounter = selectedCounter
         });
     }
+    
+    private void OnDisable() {
+        gameInput.OnInteractAction -= GameInput_OnInteractAction;
+        gameInput.OnInteractAlternateAction -= GameInput_OnInteractAlternateAction;
+    }
 
     public bool IsWalking() {
         return isWalking;
@@ -140,6 +150,10 @@ public class Player : MonoBehaviour, IKitchenObjectParent {
 
     public void SetKitchenObject(KitchenObject kitchenObject) {
         this.kitchenObject = kitchenObject;
+        
+        if (kitchenObject != null) {
+            OnPickedSomething?.Invoke(this, EventArgs.Empty);
+        }
     }
     
     public KitchenObject GetKitchenObject() {

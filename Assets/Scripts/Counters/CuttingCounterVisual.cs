@@ -23,5 +23,9 @@ public class CuttingCounterVisual : MonoBehaviour {
     private void CuttingCounter_OnCut(object sender, EventArgs e) {
         animator.SetTrigger(CUT);
     }
+    
+    private void OnDisable() {
+        cuttingCounter.OnCut -= CuttingCounter_OnCut;
+    }
 
 }
