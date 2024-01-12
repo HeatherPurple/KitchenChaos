@@ -32,7 +32,7 @@ public class SelectedCounterVisual : MonoBehaviour {
         }
     }
     
-    private void OnDisable() {
+    private void OnDestroy() {
         Player.Instance.OnSelectedCounterChanged -= Player_OnSelectedCounterChanged;
     }
 }

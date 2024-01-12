@@ -5,11 +5,12 @@ using UnityEngine;
 
 public class GameHandler : MonoBehaviour {
 
-    public event EventHandler OnStateChanged; 
+    public event EventHandler OnStateChanged;
+    public event EventHandler OnGamePaused;
+    public event EventHandler OnGameUnpaused;
     
     public static GameHandler Instance { get; private set; }
     
-    [SerializeField] private float waitingForStartTimer = 3f;
     [SerializeField] private float countdownToStartTimer = 3f;
     [SerializeField] private float gamePlayingTimerMax = 10f;
     
@@ -22,6 +23,7 @@ public class GameHandler : MonoBehaviour {
 
     private State currentState;
     private float gamePlayingTimer;
+    private bool isGameOnPause;
     
     private void Awake() {
         Instance = this;
@@ -29,14 +31,25 @@ public class GameHandler : MonoBehaviour {
         currentState = State.WaitingForStart;
     }
 
+    private void Start() {
+        GameInput.Instance.OnPauseAction += GameInput_OnPauseAction;
+        GameInput.Instance.OnInteractAction += GameInput_OnInteractAction;
+    }
+
+    private void GameInput_OnInteractAction(object sender, EventArgs e) {
+        if (currentState is State.WaitingForStart) {
+            currentState = State.CountdownToStart;
+            OnStateChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private void GameInput_OnPauseAction(object sender, EventArgs e) {
+        TogglePauseGame();
+    }
+
     private void Update() {
         switch (currentState) {
             case State.WaitingForStart:
-                waitingForStartTimer -= Time.deltaTime;
-                if (waitingForStartTimer < 0) {
-                    currentState = State.CountdownToStart;
-                    OnStateChanged?.Invoke(this, EventArgs.Empty);
-                }
                 break;
             case State.CountdownToStart:
                 countdownToStartTimer -= Time.deltaTime;
@@ -55,6 +68,26 @@ public class GameHandler : MonoBehaviour {
                 break;
             case State.GameOver:
                 break;
+        }
+    }
+
+
+    private void OnDestroy() {
+        GameInput.Instance.OnPauseAction -= GameInput_OnPauseAction;
+        GameInput.Instance.OnInteractAction -= GameInput_OnInteractAction;
+    }
+
+    public void TogglePauseGame() {
+        isGameOnPause = !isGameOnPause;
+
+        if (isGameOnPause) {
+            Time.timeScale = 0f;
+            
+            OnGamePaused?.Invoke(this, EventArgs.Empty);
+        } else { 
+            Time.timeScale = 1f;
+            
+            OnGameUnpaused?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -77,4 +110,5 @@ public class GameHandler : MonoBehaviour {
     public float GetGamePlayingTimerNormalized() {
         return gamePlayingTimer / gamePlayingTimerMax;
     }
+    
 }

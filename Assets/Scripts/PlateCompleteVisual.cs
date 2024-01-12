@@ -30,7 +30,7 @@ public class PlateCompleteVisual : MonoBehaviour {
         }
     }
     
-    private void OnDisable() {
+    private void OnDestroy() {
         plateKitchenObject.OnIngredientAdded -= PlateKitchenObject_OnIngredientAdded;
     }
 }

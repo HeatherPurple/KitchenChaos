@@ -24,7 +24,7 @@ public class ContainerCounterVisual : MonoBehaviour {
         animator.SetTrigger(OPEN_CLOSE);
     }
     
-    private void OnDisable() {
+    private void OnDestroy() {
         containerCounter.OnPlayerGrabKitchenObject -= ContainerCounter_OnPlayerGrabKitchenObject;
     }
     

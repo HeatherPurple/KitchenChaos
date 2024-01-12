@@ -85,10 +85,11 @@ public class Player : MonoBehaviour, IKitchenObjectParent {
     }
 
     private void HandleMovement() {
-        var playerTransform = transform;
-        var playerHeight = 2f;
-        var playerRadius = 0.7f;
-        var movementDistance = Time.deltaTime * movementSpeed;
+        Transform playerTransform = transform;
+        float playerHeight = 2f;
+        float playerRadius = 0.7f;
+        float gamepadMovementThreshold = 0.1f;
+        float movementDistance = Time.deltaTime * movementSpeed;
 
         Vector2 inputVector = gameInput.GetMovementVectorNormalized();
         Vector3 moveDir = new Vector3(inputVector.x, 0f, inputVector.y);
@@ -103,18 +104,20 @@ public class Player : MonoBehaviour, IKitchenObjectParent {
         if (canMove) {
             playerTransform.position += moveDir * movementDistance;
         } else {
-            Vector3 moveDirX = new Vector3(moveDir.x, 0f, 0f).normalized;
-            bool canMoveX = !Physics.CapsuleCast(playerTransform.position,
-                playerTransform.position + Vector3.up * playerHeight,
-                playerRadius, moveDirX, movementDistance);
+            Vector3 moveDirX = new Vector3(moveDir.x, 0f, 0f);
+            bool canMoveX = (moveDir.x < -gamepadMovementThreshold || moveDir.x > gamepadMovementThreshold) &&
+                            !Physics.CapsuleCast(playerTransform.position, 
+                                playerTransform.position + Vector3.up * playerHeight, 
+                                playerRadius, moveDirX.normalized, movementDistance);
 
             if (canMoveX) {
                 playerTransform.position += moveDirX * movementDistance;
             } else {
-                Vector3 moveDirZ = new Vector3(0f, 0f, moveDir.z).normalized;
-                bool canMoveZ = !Physics.CapsuleCast(playerTransform.position,
-                    playerTransform.position + Vector3.up * playerHeight,
-                    playerRadius, moveDirZ, movementDistance);
+                Vector3 moveDirZ = new Vector3(0f, 0f, moveDir.z);
+                bool canMoveZ = (moveDir.z < -gamepadMovementThreshold || moveDir.z > gamepadMovementThreshold) && 
+                                !Physics.CapsuleCast(playerTransform.position, 
+                                    playerTransform.position + Vector3.up * playerHeight, 
+                                    playerRadius, moveDirZ.normalized, movementDistance);
 
                 if (canMoveZ) {
                     playerTransform.position += moveDirZ * movementDistance;
@@ -135,7 +138,7 @@ public class Player : MonoBehaviour, IKitchenObjectParent {
         });
     }
     
-    private void OnDisable() {
+    private void OnDestroy() {
         gameInput.OnInteractAction -= GameInput_OnInteractAction;
         gameInput.OnInteractAlternateAction -= GameInput_OnInteractAlternateAction;
     }
